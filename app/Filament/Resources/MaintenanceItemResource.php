@@ -17,8 +17,10 @@ class MaintenanceItemResource extends Resource
 {
     protected static ?string $model = MaintenanceItem::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'css-list-tree';
+    protected static ?int $navigationSort = 2;
+    protected static ?string $navigationGroup = 'Mantenimiento Vehicular';
+    protected static ?string $modelLabel = 'Ítem de Mantenimiento';
     public static function form(Form $form): Form
     {
         return $form

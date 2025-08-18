@@ -8,8 +8,10 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^3.3",
+        "khatabwedaa/blade-css-icons": "^1.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "mckenziearts/blade-untitledui-icons": "^1.4",
         "ryangjchandler/filament-progress-column": "^1.0"
     },
     "require-dev": {
