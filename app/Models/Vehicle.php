@@ -20,4 +20,9 @@ class Vehicle extends Model
         'year' => 'integer',
         'current_mileage' => 'integer',
     ];
+
+    public function maintenances()
+    {
+        return $this->hasMany(Maintenance::class);
+    }
 }

@@ -12,7 +12,6 @@ enum VeicleStatus: string implements HasLabel
     case EnReparacion = 'En Reparación';
     case Recepción = 'Recepción';
 
-
     public function getLabel(): ?string
     {
         return match ($this) {

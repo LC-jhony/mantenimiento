@@ -3,24 +3,25 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MaintenanceItemResource\Pages;
-use App\Filament\Resources\MaintenanceItemResource\RelationManagers;
 use App\Models\MaintenanceItem;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MaintenanceItemResource extends Resource
 {
     protected static ?string $model = MaintenanceItem::class;
 
     protected static ?string $navigationIcon = 'css-list-tree';
+
     protected static ?int $navigationSort = 2;
+
     protected static ?string $navigationGroup = 'Mantenimiento Vehicular';
+
     protected static ?string $modelLabel = 'Ítem de Mantenimiento';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -42,7 +43,7 @@ class MaintenanceItemResource extends Resource
                             ->inlineLabel(false)
                             ->default(true),
 
-                    ])->columns(2)
+                    ])->columns(2),
             ]);
     }
 

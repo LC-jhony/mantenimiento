@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Vehicle;
-use App\Models\MaintenanceItem;
 use Illuminate\Database\Eloquent\Model;
 
 class Maintenance extends Model
@@ -30,10 +28,12 @@ class Maintenance extends Model
         'photo',
         'file',
     ];
+
     public function vehicle()
     {
         return $this->belongsTo(Vehicle::class);
     }
+
     public function maintenanceItem()
     {
         return $this->belongsTo(

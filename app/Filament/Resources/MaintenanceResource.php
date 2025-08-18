@@ -2,32 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\Vehicle;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use App\Filament\Resources\MaintenanceResource\Pages;
 use App\Models\Maintenance;
 use App\Models\MaintenanceItem;
-use Filament\Resources\Resource;
-use Filament\Tables\Grouping\Group;
+use App\Models\Vehicle;
 use App\Tables\Columns\ProgressBarColumn;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\MaintenanceResource\Pages;
+use Filament\Tables\Grouping\Group;
+use Filament\Tables\Table;
 use RyanChandler\FilamentProgressColumn\ProgressColumn;
-use App\Filament\Resources\MaintenanceResource\RelationManagers;
-use function Laravel\Prompts\progress;
 
 class MaintenanceResource extends Resource
 {
     protected static ?string $model = Maintenance::class;
 
     protected static ?string $navigationIcon = 'untitledui-tool-02';
+
     protected static ?int $navigationSort = 3;
+
     protected static ?string $navigationGroup = 'Mantenimiento Vehicular';
+
     protected static ?string $modelLabel = 'Mantenimiento';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -93,11 +93,11 @@ class MaintenanceResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->live()
-                    ->visible(fn($get) => in_array(
+                    ->visible(fn ($get) => in_array(
                         $get('maintenance_item_id'),
                         MaintenanceItem::whereIn('name', [
                             'ACEITE SINTETICO - MOTOR',
-                            'ACEITE DE CAJA DE CAMBIOS'
+                            'ACEITE DE CAJA DE CAMBIOS',
                         ])->pluck('id')->toArray()
                     )),
                 Forms\Components\Textarea::make('notes_valorization')
@@ -179,7 +179,8 @@ class MaintenanceResource extends Resource
                         $rear_left = $record->rear_left_brake_pad ?? 0;
                         $rear_right = $record->rear_right_brake_pad ?? 0;
                         $total = $front_left + $front_right + $rear_left + $rear_right;
-                        return $total / 4; // Promedio de las cuatro pastillas  
+
+                        return $total / 4; // Promedio de las cuatro pastillas
                     })
                     ->color(function ($record) {
                         $front_left = $record->front_left_brake_pad ?? 0;
@@ -192,6 +193,7 @@ class MaintenanceResource extends Resource
                         } elseif ($average >= 30) {
                             return 'warning';
                         }
+
                         return 'danger';
                     })
                     ->sortable(),
