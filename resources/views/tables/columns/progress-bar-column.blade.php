@@ -12,7 +12,7 @@
                 style="width: {{ $value }}%; background: {{ $color }}; height: 100%;">
             </div>
         </div>
-        <span class="text-xs font-bold text-gray-700 dark:text-gray-200" style="min-width: 32px; text-align: right;">
+        <span class="text-sm text-gray-700 dark:text-gray-200" style="min-width: 32px; text-align: right;">
             {{ $value }}%
         </span>
     </div>
