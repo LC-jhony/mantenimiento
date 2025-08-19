@@ -58,7 +58,7 @@
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $item->maintenanceItem->name ?? 'General' }}</td>
                                 <td style="text-align: center;"> <span
-                                        style="background-color: green; color: #fff; font-size: 0.6em; padding: 2px 10px; border-radius: 6px; margin-left: 5px;">Realizado</span>
+                                        style="background-color: #27ae60; color: #fff;  font-size: 9px; padding: 2px 10px; border-radius: 6px; margin-left: 5px;">Realizado</span>
                                 </td>
                                 <td style="text-align: center;">{{ $item->mileage_at_service }}</td>
                                 <td style="text-align: center;">{{ $item->service_date }}</td>
