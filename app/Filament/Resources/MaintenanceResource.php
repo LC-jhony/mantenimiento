@@ -197,15 +197,37 @@ class MaintenanceResource extends Resource
                         return 'danger';
                     })
                     ->sortable(),
-                // ProgressColumn::make('progres_bar')
-                //     ->label('Progreso')
-                //     ->color(
-                //         fn($record) =>
-                //         is_numeric($record->progres_bar) && $record->progres_bar >= 70 ? 'success' : (is_numeric($record->progres_bar) && $record->progres_bar >= 30 ? 'warning' : 'danger')
-                //     )
-                //     ->sortable(),
+
+                ProgressColumn::make('front_left_brake_pad')
+                    ->label('Pastilla Del. Izq.')
+                    ->color(
+                        fn($record) =>
+                        is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 70 ? 'success' : (is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 30 ? 'warning' : 'danger')
+                    )
+                    ->toggleable(isToggledHiddenByDefault: true),
+                ProgressColumn::make('front_right_brake_pad')
+                    ->label('Pastilla Del. Der.')
+                    ->color(
+                        fn($record) =>
+                        is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 70 ? 'success' : (is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 30 ? 'warning' : 'danger')
+                    )
+                    ->toggleable(isToggledHiddenByDefault: true),
+                ProgressColumn::make('rear_left_brake_pad')
+                    ->label('Pastilla Tra. Izq.')
+                    ->color(
+                        fn($record) =>
+                        is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 30 ? 'warning' : 'danger')
+                    )
+                    ->toggleable(isToggledHiddenByDefault: true),
+                ProgressColumn::make('rear_right_brake_pad')
+                    ->label('Pastilla Tra. Der.')
+                    ->color(
+                        fn($record) =>
+                        is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 30 ? 'warning' : 'danger')
+                    )
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->date()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')

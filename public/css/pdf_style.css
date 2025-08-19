@@ -14,12 +14,12 @@
        max-width: 100%;
        margin: 0 auto;
        position: relative;
-       padding-top: 10px;
+
    }
 
    .header {
        color: white;
-       padding: 20px;
+
    }
 
    .header-top {
@@ -86,6 +86,23 @@
        border-left: 3px solid var(--secondary);
    }
 
+   /* Agrupación por fecha */
+   .date-group {
+       margin-bottom: 10px;
+       padding-bottom: 8px;
+       border-bottom: 1px dashed var(--border);
+   }
+
+   .date-header {
+       font-weight: 700;
+
+       color: var(--primary);
+       margin-bottom: 6px;
+       display: flex;
+       align-items: center;
+       gap: 4px;
+   }
+
    table tr:nth-child(even) {
        background-color: #f2f2f2;
 
@@ -103,7 +120,69 @@
        border: 1px solid #ddd;
    }
 
+   .gray {
+       background-color: lightgray
+   }
+
    tfoot tr td {
        font-weight: bold;
        font-size: x-small;
+   }
+
+   /* Barras de progreso mejoradas para PDF (DomPDF) */
+   .progress-container {
+       position: relative;
+       height: 14px;
+       background-color: #e0e6ed;
+       border-radius: 7px;
+       overflow: hidden;
+       margin: 4px 0;
+       box-shadow: 0 1px 1px #ccc;
+   }
+
+   .progress-fill {
+       height: 100%;
+       position: absolute;
+       top: 0;
+       left: 0;
+       min-width: 20px;
+       display: flex;
+       align-items: center;
+       justify-content: flex-end;
+       padding-right: 6px;
+       box-sizing: border-box;
+       font-size: 9px;
+       font-weight: bold;
+       color: #fff;
+       border-radius: 7px 0 0 7px;
+       transition: width 0.3s;
+   }
+
+   .progress-success {
+       background-color: #27ae60 !important;
+       /* Verde sólido */
+   }
+
+   .progress-warning {
+       background-color: #f39c12 !important;
+       /* Naranja sólido */
+   }
+
+   .progress-danger {
+       background-color: #e74c3c !important;
+       /* Rojo sólido */
+   }
+
+   .progress-value {
+       text-align: left;
+       padding-top: 1px;
+       font-size: 9px;
+       font-weight: 700;
+       color: #fff;
+       text-shadow: none;
+       position: relative;
+       z-index: 2;
+       padding-left: 4px;
+       padding-right: 2px;
+       letter-spacing: 0.5px;
    }
