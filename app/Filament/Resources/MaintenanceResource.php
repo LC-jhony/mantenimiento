@@ -93,14 +93,14 @@ class MaintenanceResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->live()
-                    ->visible(fn ($get) => in_array(
+                    ->visible(fn($get) => in_array(
                         $get('maintenance_item_id'),
                         MaintenanceItem::whereIn('name', [
                             'ACEITE SINTETICO - MOTOR',
                             'ACEITE DE CAJA DE CAMBIOS',
                         ])->pluck('id')->toArray()
                     )),
-                Forms\Components\Textarea::make('notes_valorization')
+                Forms\Components\MarkdownEditor::make('notes_valorization')
                     ->label('Notas de Valoración')
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('photo')
