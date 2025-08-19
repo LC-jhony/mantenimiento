@@ -18,6 +18,6 @@
     </div>
 @else
     <div class="flex justify-center items-center w-full h-full">
-        <span class="text-[#3b82f6] text-xs font-bold">N/A</span>
+        <span class="text-[#3b82f6]  text-xs font-bold">N/A</span>
     </div>
 @endif

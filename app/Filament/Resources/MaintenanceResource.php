@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MaintenanceResource\Pages;
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Vehicle;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use App\Models\Maintenance;
 use App\Models\MaintenanceItem;
-use App\Models\Vehicle;
-use App\Tables\Columns\ProgressBarColumn;
-use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Grouping\Group;
-use Filament\Tables\Table;
+use App\Tables\Columns\ProgressBarColumn;
+use App\Tables\Columns\ProgressBrakeColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
+use App\Filament\Resources\MaintenanceResource\Pages;
 use RyanChandler\FilamentProgressColumn\ProgressColumn;
 
 class MaintenanceResource extends Resource
@@ -116,6 +117,12 @@ class MaintenanceResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $brakePads = [
+            'front_left_brake_pad' => 'Pastilla Del. Izq.',
+            'front_right_brake_pad' => 'Pastilla Del. Der.',
+            'rear_left_brake_pad' => 'Pastilla Tra. Izq.',
+            'rear_right_brake_pad' => 'Pastilla Tra. Der.',
+        ];
         return $table
             ->groups([
                 Group::make('vehicle.placa')
@@ -171,32 +178,30 @@ class MaintenanceResource extends Resource
 
                 ProgressBarColumn::make('progres_bar')
                     ->label('Estado de Aceite'),
-                ProgressColumn::make('pastillas_frenos')
+                ProgressBrakeColumn::make('pastillas_frenos')
                     ->label('Pastillas de Freno')
-                    ->progress(function ($record) {
-                        $front_left = $record->front_left_brake_pad ?? 0;
-                        $front_right = $record->front_right_brake_pad ?? 0;
-                        $rear_left = $record->rear_left_brake_pad ?? 0;
-                        $rear_right = $record->rear_right_brake_pad ?? 0;
-                        $total = $front_left + $front_right + $rear_left + $rear_right;
-
-                        return $total / 4; // Promedio de las cuatro pastillas
-                    })
-                    ->color(function ($record) {
-                        $front_left = $record->front_left_brake_pad ?? 0;
-                        $front_right = $record->front_right_brake_pad ?? 0;
-                        $rear_left = $record->rear_left_brake_pad ?? 0;
-                        $rear_right = $record->rear_right_brake_pad ?? 0;
-                        $average = ($front_left + $front_right + $rear_left + $rear_right) / 4;
-                        if ($average >= 70) {
-                            return 'success';
-                        } elseif ($average >= 30) {
-                            return 'warning';
+                    ->progress(function ($record) use ($brakePads) {
+                        $values = [];
+                        foreach ($brakePads as $field => $label) {
+                            $val = $record->{$field};
+                            if (is_numeric($val)) {
+                                $values[] = $val;
+                            }
                         }
-
-                        return 'danger';
+                        return count($values) ? array_sum($values) / count($values) : null;
                     })
                     ->sortable(),
+
+                ...collect($brakePads)->map(function ($label, $field) {
+                    return ProgressColumn::make($field)
+                        ->label($label)
+                        ->color(
+                            fn($record) =>
+                            is_numeric($record->{$field}) && $record->{$field} >= 70 ? 'success'
+                                : (is_numeric($record->{$field}) && $record->{$field} >= 30 ? 'warning' : 'danger')
+                        )
+                        ->toggleable(isToggledHiddenByDefault: true);
+                })->toArray(),
 
                 ProgressColumn::make('front_left_brake_pad')
                     ->label('Pastilla Del. Izq.')
