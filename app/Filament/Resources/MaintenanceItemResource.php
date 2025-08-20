@@ -42,7 +42,11 @@ class MaintenanceItemResource extends Resource
                             ->inline()
                             ->inlineLabel(false)
                             ->default(true),
-
+                        Forms\Components\TextInput::make('interval_km')
+                            ->label('Intervalo de Mantenimiento (km)')
+                            ->numeric()
+                            ->placeholder('7500 ')
+                            ->required(),
                     ])->columns(2),
             ]);
     }
@@ -50,6 +54,9 @@ class MaintenanceItemResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
+            ->paginated([5, 10, 25, 50, 100, 'all'])
+            ->defaultPaginationPageOption(5)
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nombre')
@@ -57,6 +64,10 @@ class MaintenanceItemResource extends Resource
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Estado')
+                    ->sortable()
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('interval_km')
+                    ->label('Intervalo (km)')
                     ->sortable()
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('created_at')

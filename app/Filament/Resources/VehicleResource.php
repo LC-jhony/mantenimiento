@@ -2,14 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Enum\VeicleStatus;
-use App\Filament\Resources\VehicleResource\Pages;
-use App\Models\Vehicle;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use App\Models\Vehicle;
+use Filament\Forms\Form;
+use App\Enum\VeicleStatus;
 use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\ActionGroup;
+use App\Tables\Columns\ProgressBarColumn;
+use Filament\Support\Enums\VerticalAlignment;
+use App\Filament\Resources\VehicleResource\Pages;
+use RyanChandler\FilamentProgressColumn\ProgressColumn;
 
 class VehicleResource extends Resource
 {
@@ -75,6 +79,9 @@ class VehicleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->striped()
+            ->paginated([5, 10, 25, 50, 100, 'all'])
+            ->defaultPaginationPageOption(5)
             ->columns([
                 Tables\Columns\TextColumn::make('code')
                     ->label('PROG.')
@@ -94,7 +101,8 @@ class VehicleResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Estado del Vehículo')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->alignCenter()
+                    ->color(fn(string $state): string => match ($state) {
                         'Operativo' => 'success',
                         'En Mantenimiento' => 'warning',
                         'Fuera de Servicio' => 'danger',
@@ -103,11 +111,20 @@ class VehicleResource extends Resource
 
                         default => 'primary',
                     }),
+
+                // 🔹 Barra de progreso Aceite
+                ProgressBarColumn::make('oil_progress')
+                    ->label('Estado de Aceite'),
+
+                // 🔹 Barra de progreso Frenos
+                ProgressBarColumn::make('brake_progress')
+                    ->label('Frenos'),
                 Tables\Columns\TextColumn::make('current_mileage')
                     ->label('Kilometraje Actual')
                     ->suffix(' km')
-                    ->sortable(),
-
+                    ->badge()
+                    ->sortable()
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha de Registro')
                     ->dateTime()
@@ -123,9 +140,11 @@ class VehicleResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ])->label('Acciones'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

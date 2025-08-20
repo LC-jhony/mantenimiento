@@ -9,6 +9,7 @@ class MaintenanceItem extends Model
     protected $fillable = [
         'name',
         'is_active',
+        'interval_km',
     ];
 
     protected $casts = [

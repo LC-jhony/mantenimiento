@@ -48,7 +48,7 @@ class ListMaintenances extends ListRecords
                                 ->label('Fecha final')
                                 ->required()
                                 ->native(false),
-                        ])
+                        ]),
                 ])
                 ->modalSubmitActionLabel('Generar PDF')
                 ->action(function (array $data) {

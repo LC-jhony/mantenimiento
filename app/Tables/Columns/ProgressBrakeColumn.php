@@ -7,11 +7,13 @@ use Filament\Tables\Columns\Column;
 class ProgressBrakeColumn extends Column
 {
     protected string $view = 'tables.columns.progress-brake-column';
+
     protected $progressCallback;
 
     public function progress(callable $callback): static
     {
         $this->progressCallback = $callback;
+
         return $this;
     }
 
@@ -20,6 +22,7 @@ class ProgressBrakeColumn extends Column
         if ($this->progressCallback) {
             return call_user_func($this->progressCallback, $this->getRecord());
         }
+
         return parent::getState();
     }
 }

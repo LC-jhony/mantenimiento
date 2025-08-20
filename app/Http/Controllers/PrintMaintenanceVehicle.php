@@ -28,7 +28,7 @@ class PrintMaintenanceVehicle extends Controller
         if ($endDate) {
             $query->whereDate($dateColumn, '<=', $endDate);
         }
-        // 
+        //
         $vehicles = $query->get()->groupBy('vehicle_id');
         $pdf = Pdf::loadView('pdf.print_maintenance_vehicle', [
             'vehicles' => $vehicles,

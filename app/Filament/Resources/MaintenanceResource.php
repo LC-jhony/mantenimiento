@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Vehicle;
+use Filament\Forms\Get;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Maintenance;
@@ -31,87 +32,190 @@ class MaintenanceResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        $aceiteIds = MaintenanceItem::query()
+            ->whereIn('name', ['ACEITE SINTETICO - MOTOR', 'ACEITE DE CAJA DE CAMBIOS'])
+            ->pluck('id')
+            ->map(fn($id) => (string) $id) // el Select devuelve string; igualamos tipos
+            ->all();
         return $form
             ->schema([
-                Forms\Components\Select::make('vehicle_id')
-                    ->label('Vehiculo')
-                    ->options(Vehicle::whereIn('status', ['Operativo', 'Recepción'])->pluck('placa', 'id')->toArray())
-                    ->required()
-                    ->searchable('placa')
+                Forms\Components\Grid::make(4) // columna principal 2/3 y sidebar 1/3
+                    ->schema([
 
-                    ->native(false),
-                Forms\Components\Select::make('maintenance_item_id')
-                    ->label('Mantenimiento Item')
-                    ->options(
-                        MaintenanceItem::where('is_active', true)->pluck('name', 'id')->toArray()
-                    )
-                    ->live()
-                    ->searchable()
-                    ->required()
-                    ->native(false),
-                Forms\Components\TextInput::make('mileage_at_service')
-                    ->label('Kilometraje')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('service_date')
-                    ->label('Fecha de Servicio')
-                    ->required()
-                    ->default(now()),
-                Forms\Components\TextInput::make('labor_cost')
-                    ->label('Costo de Mano de Obra')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('parts_cost')
-                    ->label('Costo de Piezas')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('extra_cost')
-                    ->label('Costo Extra')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('total_cost')
-                    ->label('Costo Total')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('front_left_brake_pad')
-                    ->label('Pastilla de Freno Delantera Izquierda')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('front_right_brake_pad')
-                    ->label('Pastilla de Freno Delantera Derecha')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('rear_left_brake_pad')
-                    ->label('Pastilla de Freno Trasera Izquierda')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('rear_right_brake_pad')
-                    ->label('Pastilla de Freno Trasera Derecha')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('progres_bar')
-                    ->label('Progreso')
-                    ->required()
-                    ->maxLength(255)
-                    ->live()
-                    ->visible(fn($get) => in_array(
-                        $get('maintenance_item_id'),
-                        MaintenanceItem::whereIn('name', [
-                            'ACEITE SINTETICO - MOTOR',
-                            'ACEITE DE CAJA DE CAMBIOS',
-                        ])->pluck('id')->toArray()
-                    )),
-                Forms\Components\MarkdownEditor::make('notes_valorization')
-                    ->label('Notas de Valoración')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('photo')
-                    ->label('Foto')
-                    ->maxLength(255)
-                    ->default(null),
-                Forms\Components\TextInput::make('file')
-                    ->label('Archivo')
-                    ->maxLength(255)
-                    ->default(null),
+                        // =========================
+                        // 🔹 COLUMNA IZQUIERDA
+                        // =========================
+                        Forms\Components\Grid::make()
+                            ->columnSpan(2)
+                            ->schema([
+
+                                Forms\Components\Section::make('Información Básica')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\Select::make('vehicle_id')
+                                                ->label('Vehículo')
+                                                ->options(Vehicle::whereIn('status', ['Operativo', 'Recepción'])->pluck('placa', 'id')->toArray())
+                                                ->required()
+                                                ->searchable()
+                                                ->native(false),
+
+                                            Forms\Components\Select::make('maintenance_item_id')
+                                                ->label('Tipo de Mantenimiento')
+                                                ->options(MaintenanceItem::where('is_active', true)->pluck('name', 'id'))
+                                                ->searchable()
+                                                ->live()
+                                                ->native(false),
+                                        ]),
+
+                                        Forms\Components\TextInput::make('mileage_at_service')
+                                            ->label('Kilometraje actual')
+                                            ->required()
+                                            ->numeric()
+                                            ->suffix(' km'),
+
+                                        Forms\Components\MarkdownEditor::make('notes_valorization')
+                                            ->label('Notas de Valoración')
+                                            ->columnSpanFull(),
+                                    ]),
+
+                                Forms\Components\Section::make('Costos')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\TextInput::make('labor_cost')
+                                                ->label('Mano de Obra')
+                                                ->required()
+                                                ->numeric()
+                                                ->prefix('S/.')
+                                                ->reactive()
+                                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                    $set(
+                                                        'total_cost',
+                                                        (float) ($get('labor_cost') ?? 0) +
+                                                            (float) ($get('parts_cost') ?? 0) +
+                                                            (float) ($get('extra_cost') ?? 0)
+                                                    );
+                                                }),
+
+                                            Forms\Components\TextInput::make('parts_cost')
+                                                ->label('Piezas')
+                                                ->required()
+                                                ->numeric()
+                                                ->prefix('S/.')
+                                                ->reactive()
+                                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                    $set(
+                                                        'total_cost',
+                                                        (float) ($get('labor_cost') ?? 0) +
+                                                            (float) ($get('parts_cost') ?? 0) +
+                                                            (float) ($get('extra_cost') ?? 0)
+                                                    );
+                                                }),
+
+                                            Forms\Components\TextInput::make('extra_cost')
+                                                ->label('Extra')
+                                                ->numeric()
+                                                ->prefix('S/.')
+                                                ->default(null)
+                                                ->reactive()
+                                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                                    $set(
+                                                        'total_cost',
+                                                        (float) ($get('labor_cost') ?? 0) +
+                                                            (float) ($get('parts_cost') ?? 0) +
+                                                            (float) ($get('extra_cost') ?? 0)
+                                                    );
+                                                }),
+
+                                            Forms\Components\TextInput::make('total_cost')
+                                                ->label('Total')
+                                                ->required()
+                                                ->numeric()
+                                                ->prefix('S/.')
+                                                ->disabled()
+                                                ->dehydrated(),
+                                        ]),
+                                    ]),
+
+
+                            ]),
+
+                        // =========================
+                        // 🔹 COLUMNA DERECHA (SIDEBAR)
+                        // =========================
+                        Forms\Components\Grid::make()
+                            ->columnSpan(2)
+                            ->schema([
+
+                                Forms\Components\Section::make('Estado')
+                                    ->schema([
+                                        Forms\Components\DatePicker::make('service_date')
+                                            ->label('Fecha de Servicio')
+                                            ->required()
+                                            ->default(now())
+                                            ->native(false),
+
+                                        Forms\Components\TextInput::make('interval_km')
+                                            ->label('Intervalo')
+                                            ->numeric()
+                                            ->suffix(' km'),
+                                    ])->columns(2),
+
+                                Forms\Components\Section::make('Frenos')
+                                    //->collapsed()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('front_left_brake_pad')
+                                            ->label('Del. Izquierda')
+                                            ->numeric()
+                                            ->suffix('%'),
+
+                                        Forms\Components\TextInput::make('front_right_brake_pad')
+                                            ->label('Del. Derecha')
+                                            ->numeric()
+                                            ->suffix('%'),
+
+                                        Forms\Components\TextInput::make('rear_left_brake_pad')
+                                            ->label('Tras. Izquierda')
+                                            ->numeric()
+                                            ->suffix('%'),
+
+                                        Forms\Components\TextInput::make('rear_right_brake_pad')
+                                            ->label('Tras. Derecha')
+                                            ->numeric()
+                                            ->suffix('%'),
+                                    ])->columns(2),
+
+                                Forms\Components\Section::make('Aceite')
+                                    // ->collapsed()
+                                    ->schema([
+                                        Forms\Components\TextInput::make('progres_bar')
+                                            ->label('Progreso')
+                                            ->required()
+                                            ->minValue(0)
+                                            ->maxValue(100)
+                                            ->suffix('%')
+                                            // requerido solo si aplica
+                                            ->required(fn(Get $get) => in_array($get('maintenance_item_id'), $aceiteIds, true))
+                                            // oculto cuando NO aplica
+                                            ->hidden(fn(Get $get) => ! in_array($get('maintenance_item_id'), $aceiteIds, true))
+                                            // solo se envía a la DB si aplica (evita errores de validación/required)
+                                            ->dehydrated(fn(Get $get) => in_array($get('maintenance_item_id'), $aceiteIds, true))
+                                            ->default(null)
+                                    ]),
+                                Forms\Components\Section::make('Imágenes y Archivos')
+                                    //->collapsed()
+                                    ->schema([
+                                        Forms\Components\FileUpload::make('photo')
+                                            ->label('Foto')
+                                            ->image()
+                                            ->directory('maintenance/photos'),
+
+                                        Forms\Components\FileUpload::make('file')
+                                            ->label('Archivo adicional')
+                                            ->directory('maintenance/files'),
+                                    ]),
+                            ]),
+                    ]),
             ]);
     }
 
@@ -123,12 +227,17 @@ class MaintenanceResource extends Resource
             'rear_left_brake_pad' => 'Pastilla Tra. Izq.',
             'rear_right_brake_pad' => 'Pastilla Tra. Der.',
         ];
+
         return $table
+            ->striped()
+            ->paginated([5, 10, 25, 50, 100, 'all'])
+            ->defaultPaginationPageOption(5)
             ->groups([
                 Group::make('vehicle.placa')
                     ->label('Vehiculo')
                     ->collapsible(),
                 Group::make('created_at')
+                    ->label('Fecha de Creación')
                     ->date(),
             ])
             ->defaultGroup('vehicle.placa')
@@ -188,6 +297,7 @@ class MaintenanceResource extends Resource
                                 $values[] = $val;
                             }
                         }
+
                         return count($values) ? array_sum($values) / count($values) : null;
                     })
                     ->sortable(),
@@ -196,8 +306,7 @@ class MaintenanceResource extends Resource
                     return ProgressColumn::make($field)
                         ->label($label)
                         ->color(
-                            fn($record) =>
-                            is_numeric($record->{$field}) && $record->{$field} >= 70 ? 'success'
+                            fn($record) => is_numeric($record->{$field}) && $record->{$field} >= 70 ? 'success'
                                 : (is_numeric($record->{$field}) && $record->{$field} >= 30 ? 'warning' : 'danger')
                         )
                         ->toggleable(isToggledHiddenByDefault: true);
@@ -206,31 +315,29 @@ class MaintenanceResource extends Resource
                 ProgressColumn::make('front_left_brake_pad')
                     ->label('Pastilla Del. Izq.')
                     ->color(
-                        fn($record) =>
-                        is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 70 ? 'success' : (is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 30 ? 'warning' : 'danger')
+                        fn($record) => is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 70 ? 'success' : (is_numeric($record->front_left_brake_pad) && $record->front_left_brake_pad >= 30 ? 'warning' : 'danger')
                     )
                     ->toggleable(isToggledHiddenByDefault: true),
                 ProgressColumn::make('front_right_brake_pad')
                     ->label('Pastilla Del. Der.')
                     ->color(
-                        fn($record) =>
-                        is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 70 ? 'success' : (is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 30 ? 'warning' : 'danger')
+                        fn($record) => is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 70 ? 'success' : (is_numeric($record->front_right_brake_pad) && $record->front_right_brake_pad >= 30 ? 'warning' : 'danger')
                     )
                     ->toggleable(isToggledHiddenByDefault: true),
                 ProgressColumn::make('rear_left_brake_pad')
                     ->label('Pastilla Tra. Izq.')
                     ->color(
-                        fn($record) =>
-                        is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 30 ? 'warning' : 'danger')
+                        fn($record) => is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_left_brake_pad) && $record->rear_left_brake_pad >= 30 ? 'warning' : 'danger')
                     )
                     ->toggleable(isToggledHiddenByDefault: true),
                 ProgressColumn::make('rear_right_brake_pad')
                     ->label('Pastilla Tra. Der.')
                     ->color(
-                        fn($record) =>
-                        is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 30 ? 'warning' : 'danger')
+                        fn($record) => is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 70 ? 'success' : (is_numeric($record->rear_right_brake_pad) && $record->rear_right_brake_pad >= 30 ? 'warning' : 'danger')
                     )
                     ->toggleable(isToggledHiddenByDefault: true),
+
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->date()
                     ->sortable()
