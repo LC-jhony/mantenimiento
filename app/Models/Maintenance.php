@@ -54,15 +54,15 @@ class Maintenance extends Model
 
 
 
-    public function isDue($currentMileage)
-    {
-        return $currentMileage >= $this->next_service_mileage;
-    }
+    // public function isDue($currentMileage)
+    // {
+    //     return $currentMileage >= $this->next_service_mileage;
+    // }
 
-    public function kmRemaining($currentMileage)
-    {
-        return $this->next_service_mileage - $currentMileage;
-    }
+    // public function kmRemaining($currentMileage)
+    // {
+    //     return $this->next_service_mileage - $currentMileage;
+    // }
     // App\Models\Maintenance.php
 
 }

@@ -55,4 +55,9 @@ class Vehicle extends Model
         $pads = array_filter($pads, fn($val) => is_numeric($val));
         return count($pads) ? array_sum($pads) / count($pads) : null;
     }
+    public function lastMaintenanceMileage()
+    {
+        return $this->hasOne(Maintenance::class)->latestOfMany('service_date')
+            ->select('maintenances.mileage_at_service', 'maintenances.vehicle_id');
+    }
 }

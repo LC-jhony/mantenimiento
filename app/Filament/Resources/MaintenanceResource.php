@@ -34,7 +34,7 @@ class MaintenanceResource extends Resource
     {
 
         $aceiteIds = MaintenanceItem::query()
-            ->whereIn('name', ['ACEITE SINTETICO - MOTOR', 'ACEITE DE CAJA DE CAMBIOS'])
+            ->whereIn('name', ['ACEITE SINTETICO - MOTOR', 'ACEITE DE CAJA DE CAMBIOS', 'ACEITE DIFERENCIAL', 'ACEITE DE DIRECCION ATF'])
             ->pluck('id')
             ->map(fn($id) => (string) $id) // el Select devuelve string; igualamos tipos
             ->all();
@@ -67,7 +67,6 @@ class MaintenanceResource extends Resource
                                                 ->live()
                                                 ->native(false),
                                         ]),
-
                                         Forms\Components\TextInput::make('mileage_at_service')
                                             ->label('Kilometraje actual')
                                             ->required()
@@ -167,21 +166,29 @@ class MaintenanceResource extends Resource
                                         Forms\Components\TextInput::make('front_left_brake_pad')
                                             ->label('Del. Izquierda')
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(100)
                                             ->suffix('%'),
 
                                         Forms\Components\TextInput::make('front_right_brake_pad')
                                             ->label('Del. Derecha')
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(100)
                                             ->suffix('%'),
 
                                         Forms\Components\TextInput::make('rear_left_brake_pad')
                                             ->label('Tras. Izquierda')
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(100)
                                             ->suffix('%'),
 
                                         Forms\Components\TextInput::make('rear_right_brake_pad')
                                             ->label('Tras. Derecha')
                                             ->numeric()
+                                            ->minValue(0)
+                                            ->maxValue(100)
                                             ->suffix('%'),
                                     ])->columns(2),
 
@@ -240,6 +247,7 @@ class MaintenanceResource extends Resource
                     ->label('Fecha de Creación')
                     ->date(),
             ])
+
             ->defaultGroup('vehicle.placa')
             ->striped()
             ->paginated([5, 10, 25, 50, 100, 'all'])
@@ -253,8 +261,9 @@ class MaintenanceResource extends Resource
                     ->label('Mantenimiento')
                     ->numeric()
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('mileage_at_service')
-                    ->label('Kilometraje')
+                    ->label(' actual')
                     ->searchable()
                     ->suffix(' km'),
                 Tables\Columns\TextColumn::make('service_date')

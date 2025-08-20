@@ -13,6 +13,7 @@ use Filament\Tables\Actions\ActionGroup;
 use App\Tables\Columns\ProgressBarColumn;
 use Filament\Support\Enums\VerticalAlignment;
 use App\Filament\Resources\VehicleResource\Pages;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use RyanChandler\FilamentProgressColumn\ProgressColumn;
 
 class VehicleResource extends Resource
@@ -79,9 +80,11 @@ class VehicleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+
             ->striped()
             ->paginated([5, 10, 25, 50, 100, 'all'])
             ->defaultPaginationPageOption(5)
+
             ->columns([
                 Tables\Columns\TextColumn::make('code')
                     ->label('PROG.')
@@ -125,6 +128,7 @@ class VehicleResource extends Resource
                     ->badge()
                     ->sortable()
                     ->alignCenter(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Fecha de Registro')
                     ->dateTime()
@@ -152,7 +156,10 @@ class VehicleResource extends Resource
                 ]),
             ]);
     }
-
+    // public static function getTableQuery(): Builder
+    // {
+    //     return parent::getTableQuery()->with(['lastMaintenance', 'lastMaintenanceMileage']);
+    // }
     public static function getRelations(): array
     {
         return [
