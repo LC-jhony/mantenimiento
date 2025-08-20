@@ -35,6 +35,12 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
+            ->navigationGroups([
+                'Gestión de Personal',
+                'Gestión de Minas',
+                'Mantenimiento Vehicular',
+                'Roles y Permisos',
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
